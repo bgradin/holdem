@@ -1,11 +1,11 @@
 import console from 'console';
 import EventEmitter from 'events';
 import ws from 'ws';
-import Message, { ErrorMessage } from './message';
+import Message from './message';
 
 const PING_INTERVAL = 10000;
 
-interface PlayerId {
+export interface PlayerDetails {
   name: string;
 }
 
@@ -13,19 +13,19 @@ export default class Client extends EventEmitter {
   static EVENT_MESSAGE = 'message';
   static EVENT_TERMINATED = 'terminated';
 
-  static ERROR_PLAYER_MUST_IDENTIFY = 'identify';
-
   alive: boolean;
-  id?: PlayerId;
+  id: string;
+  player?: PlayerDetails;
 
   #client: ws;
   #pongReceived = true;
 
-  constructor(client: ws) {
+  constructor(client: ws, id: string) {
     super();
 
     this.#client = client;
     this.alive = true;
+    this.id = id;
 
     this.#client.on('message', this.#onMessage.bind(this));
     this.#client.on('pong', this.#onPong.bind(this));
@@ -42,19 +42,17 @@ export default class Client extends EventEmitter {
     }));
   }
 
-  #identify(data: any) {
-    if (typeof data === 'object' && typeof data.name === 'string') {
-      this.id = data;
-      this.send(new Message({ type: Message.TYPE_CONFIRM }));
-    } else {
-      console.error(`Invalid player data: ${data.toString()}`);
-      this.send(new ErrorMessage(Client.ERROR_PLAYER_MUST_IDENTIFY));
-    }
+  close() {
+    this.#client.close();
+    this.emit(Client.EVENT_TERMINATED, this);
+  }
+
+  identify(player: PlayerDetails) {
+    this.player = player;
   }
 
   #onClose() {
-    this.#client.close();
-    this.emit(Client.EVENT_TERMINATED, this);
+    this.close();
   }
 
   #onMessage(message: ws.RawData) {
@@ -62,11 +60,7 @@ export default class Client extends EventEmitter {
     try {
       const json = JSON.parse(message.toString('utf8'));
       if (typeof json.type === 'string' && typeof json.data === 'object') {
-        if (json.type === Message.TYPE_IDENTIFY_PLAYER) {
-          this.#identify(json.data);
-        } else {
-          this.emit(json.type, json.data);
-        }
+        this.emit(json.type, json.data);
       } else {
         throw new Error();
       }

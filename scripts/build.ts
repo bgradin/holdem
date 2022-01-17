@@ -3,16 +3,25 @@ import fs from 'fs';
 import http from 'http';
 import path from 'path';
 import * as esbuild from 'esbuild';
+import sassPlugin from 'esbuild-plugin-sass';
 
 const copyStaticFiles = require('esbuild-copy-static-files');
 
 const PORT = 3031;
 
 esbuild.build({
-  entryPoints: ['src/client/app.tsx'],
+  entryPoints: ['src/client/main.tsx'],
   outfile: 'src/client/public/bundle.js',
   bundle: true,
-  watch: !process.env.PRODUCTION,
+  watch: process.env.PRODUCTION ? undefined : {
+    onRebuild(error: esbuild.BuildFailure | null, result?: esbuild.BuildResult | null) {
+      if (error) {
+        console.error(`ESBuild: Build failed: ${error}`);
+      } else if (result) {
+        console.log('ESBuild: Build successful!');
+      }
+    },
+  },
   minify: !!process.env.PRODUCTION,
   sourcemap: true,
   plugins: [
@@ -21,11 +30,16 @@ esbuild.build({
       dest: 'src/client/public/index.html',
       force: true,
     }),
+    sassPlugin(),
   ],
-}).catch((err) => {
-  console.error(err);
-}).then(() => {
-  console.log('Esbuild successful!');
+}).then((value: void | esbuild.BuildResult | null) => {
+  if (value && value.errors && value.errors.length > 0) {
+    console.error('ESBuild: Build failed!');
+    value.errors.forEach((error) => console.error(error));
+    process.exit(1);
+  }
+
+  console.log('ESBuild: Build successful!');
 
   if (!process.env.PRODUCTION) {
     // eslint-disable-next-line global-require
