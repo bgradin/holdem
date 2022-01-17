@@ -1,10 +1,10 @@
 import * as React from 'react';
 import { Modal } from 'react-bootstrap';
-import EnumRouter from '../enum-router';
-import CreateGame from '../forms/create-game';
-import JoinGame from '../forms/join-game';
-import Initial from '../forms/initial';
-import Client from '../../client';
+import EnumRouter from './enum-router';
+import CreateGame from './forms/create-game';
+import JoinGame from './forms/join-game';
+import Initial from './forms/initial';
+import Client from '../client';
 
 enum ViewMode {
   ViewModeInitial,

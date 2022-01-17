@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Button, Form, Modal } from 'react-bootstrap';
-import Client from '../../../client';
+import Client from '../../client';
 
 interface FormProps {
   client: Client;

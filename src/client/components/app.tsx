@@ -1,8 +1,8 @@
 import * as React from 'react';
-import Client from '../../client';
-import Message from '../../message';
-import Game from '../game';
-import PrerequisiteModal from '../prerequisite-modal';
+import Client from '../client';
+import Message from '../message';
+import Game from './game';
+import PrerequisiteModal from './prerequisite-modal';
 
 let client: Client;
 
