@@ -1,13 +1,17 @@
 import * as React from 'react';
-import { ClientDetails } from '../../client';
+import { v4 as uuidv4 } from 'uuid';
+import { PlayerDetails } from '../../client';
 
 export interface GameDetails {
   secret: string;
+  name: string;
 }
 
 export interface GamePublicState {
   id: string;
-  clients: ClientDetails[];
+  name: string;
+  ownerId: string,
+  players: PlayerDetails[];
 }
 
 interface GameProps {
@@ -28,11 +32,14 @@ export default function Game({ state }: GameProps) {
   return (
     <div className="game">
       {
+        state && <h1>{state.name}</h1>
+      }
+      {
         state && (
           <>
             <p>Clients:</p>
-            {state.clients.map(
-              (x: ClientDetails) => (<p key={x.id}>{x.player.name}</p>),
+            {state.players.map(
+              (x: PlayerDetails) => (<p key={uuidv4()}>{x.name}</p>),
             )}
           </>
         )

@@ -1,21 +1,23 @@
 import fs from 'fs';
+import { IncomingMessage } from 'http';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import ws from 'ws';
-import Client, { PlayerDetails } from './client';
+import Client from './client';
 import Errors from './errors';
 import Game from './game';
 import Message, {
   ConfirmationMessage,
   ErrorMessage,
 } from './message';
+import Player from './player';
 
 const SECRET = fs.readFileSync(path.resolve(__dirname, 'SECRET'), { encoding: 'utf8' });
 
 const port = 3030;
 
-const clients: Record<string, Client> = {};
 const games: Record<string, Game> = {};
+const players: Record<string, Player> = {};
 
 function validateClientIdentity(data: any): boolean {
   return typeof data === 'object'
@@ -23,74 +25,92 @@ function validateClientIdentity(data: any): boolean {
     && typeof data.name === 'string';
 }
 
-function registerClient(client: Client, data: any) {
+function newId(): string {
+  return uuidv4().replace(/-/g, '').substring(0, 10);
+}
+
+function getPlayerId(client: Client) {
+  return Object.keys(players).find((key) => players[key].client === client);
+}
+
+function registerPlayer(client: Client, data: any, ip: string) {
   if (!validateClientIdentity) {
-    client.send(new ErrorMessage(Errors.PLAYER_MUST_IDENTIFY));
+    client.send(new ErrorMessage(Errors.PLAYER_MUST_REGISTER));
   } else {
+    const id = data.id || newId();
+    const player = new Player({
+      id,
+      ip,
+      name: data.name,
+    }, client);
+
     if (data.id) {
-      delete clients[client.id];
+      if (players[data.id]) {
+        if (players[data.id].ip !== ip) {
+          client.send(new ErrorMessage(Errors.INVALID_DATA));
+          return;
+        }
 
-      if (clients[data.id]) {
-        clients[data.id].close();
-        delete clients[data.id];
+        players[data.id].client.close();
+        delete players[data.id];
       }
-
-      clients[data.id] = client;
     }
 
-    client.identify(data as PlayerDetails);
-    client.send(new ConfirmationMessage({ id: client.id }));
+    players[data.id] = player;
+    client.send(new ConfirmationMessage({ id }));
   }
 }
 
 function createGame(client: Client, data: any) {
-  if (typeof data !== 'object' || data.secret !== SECRET) {
+  const playerId = getPlayerId(client);
+  if (typeof data !== 'object' || data.secret !== SECRET || !data.name) {
     client.send(new ErrorMessage(Errors.INVALID_DATA));
-  } else if (!client.player) {
-    client.send(new ErrorMessage(Errors.PLAYER_MUST_IDENTIFY));
-  } else if (Object.keys(games).some((key) => games[key].clients.some((x) => x === client))) {
+  } else if (!playerId) {
+    client.send(new ErrorMessage(Errors.PLAYER_MUST_REGISTER));
+  } else if (Object.keys(games).some((key) => games[key].players.some((p) => p.id === playerId))) {
     client.send(new ErrorMessage(Errors.ALREADY_IN_GAME));
   } else {
-    const id = uuidv4().replace(/-/g, '');
-    games[id] = new Game(id, client);
+    const id = newId();
+    games[id] = new Game(id, data.name, players[playerId]);
     client.send(new ConfirmationMessage({ state: games[id].getState() }));
   }
 }
 
 function joinGame(client: Client, data: any) {
+  const playerId = getPlayerId(client);
   if (typeof data !== 'object') {
     client.send(new ErrorMessage(Errors.INVALID_DATA));
-  } else if (!client.player) {
-    client.send(new ErrorMessage(Errors.PLAYER_MUST_IDENTIFY));
+  } else if (!playerId) {
+    client.send(new ErrorMessage(Errors.PLAYER_MUST_REGISTER));
   } else if (typeof data.gameId !== 'string' || !games[data.gameId]) {
     client.send(new ErrorMessage(Errors.GAME_NOT_FOUND));
   } else {
-    games[data.gameId].addPlayer(client);
+    games[data.gameId].addPlayer(players[playerId]);
   }
 }
 
-function removeClient(client: Client) {
-  Object.keys(games).forEach((key) => {
-    games[key].removePlayer(client);
-  });
+function removePlayer(client: Client) {
+  const playerKey = getPlayerId(client);
+  if (playerKey) {
+    Object.keys(games).forEach((key) => {
+      games[key].removePlayer(players[playerKey]);
+    });
 
-  Object.keys(clients).forEach((key) => {
-    if (clients[key] === client) {
-      delete clients[key];
-    }
-  });
+    delete players[playerKey];
+  }
 }
 
 function start() {
   const server = new ws.Server({ port });
-  server.on('connection', (socket) => {
-    const client = new Client(socket, uuidv4().replace(/-/g, ''));
-    clients[client.id] = client;
-
-    client.on(Message.TYPE_IDENTIFY_PLAYER, (data) => registerClient(client, data));
+  server.on('connection', (socket, req: IncomingMessage) => {
+    const client = new Client(socket);
+    client.on(
+      Message.TYPE_REGISTER_PLAYER,
+      (data) => registerPlayer(client, data, req.socket.remoteAddress || ''),
+    );
     client.on(Message.TYPE_CREATE_GAME, (data) => createGame(client, data));
     client.on(Message.TYPE_JOIN_GAME, (data) => joinGame(client, data));
-    client.on(Client.EVENT_TERMINATED, removeClient);
+    client.on(Client.EVENT_TERMINATED, removePlayer);
   });
 }
 

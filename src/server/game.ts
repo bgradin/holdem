@@ -1,48 +1,57 @@
-import Client from './client';
 import Message from './message';
+import Player, { PlayerPublicDetails } from './player';
 
 interface GamePublicState {
-
+  id: string;
+  name: string;
+  ownerId: string;
+  players: PlayerPublicDetails[];
 }
 
 export default class Game {
   id: string;
-  owner: Client;
-  clients: Client[] = [];
+  name: string;
+  owner: Player;
+  players: Player[] = [];
 
-  constructor(id: string, owner: Client) {
+  constructor(id: string, name: string, owner: Player) {
     this.id = id;
+    this.name = name;
     this.owner = owner;
-    this.clients.push(this.owner);
+    this.players.push(this.owner);
   }
 
-  addPlayer(client: Client) {
-    this.clients.push(client);
+  addPlayer(player: Player) {
+    this.players.push(player);
 
     const state = this.getState();
-    this.clients
-      .forEach((gameClient) => {
-        const isNewPlayer = gameClient === client;
-        gameClient.send(new Message({
-          type: isNewPlayer ? Message.TYPE_CONFIRM : Message.TYPE_GAME_STATE,
-          subtype: isNewPlayer ? Message.TYPE_GAME_STATE : undefined,
-          data: { state },
-        }));
+    this.players
+      .forEach((p) => {
+        const isNewPlayer = p === player;
+        if (p.client.connected) {
+          p.client.send(new Message({
+            type: isNewPlayer ? Message.TYPE_CONFIRM : Message.TYPE_GAME_STATE,
+            subtype: isNewPlayer ? Message.TYPE_GAME_STATE : undefined,
+            data: { state },
+          }));
+        }
       });
   }
 
-  removePlayer(client: Client) {
-    const index = this.clients.indexOf(client);
+  removePlayer(player: Player) {
+    const index = this.players.indexOf(player);
     if (index >= 0) {
-      this.clients.splice(index, 1);
+      this.players.splice(index, 1);
 
       const state = this.getState();
-      this.clients
-        .forEach((gameClient) => {
-          gameClient.send(new Message({
-            type: Message.TYPE_GAME_STATE,
-            data: { state },
-          }));
+      this.players
+        .forEach((p) => {
+          if (p.client.connected) {
+            p.client.send(new Message({
+              type: Message.TYPE_GAME_STATE,
+              data: { state },
+            }));
+          }
         });
     }
   }
@@ -50,11 +59,11 @@ export default class Game {
   getState(): GamePublicState {
     return {
       id: this.id,
-      owner: this.owner.id,
-      clients: this.clients.map((client) => ({
-        alive: client.alive,
-        id: client.id,
-        player: client.player,
+      name: this.name,
+      ownerId: this.owner.id,
+      players: this.players.map((player) => ({
+        name: player.name,
+        connected: player.client.connected,
       })),
     };
   }

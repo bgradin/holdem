@@ -11,12 +11,6 @@ export interface PlayerDetails {
   name: string;
 }
 
-export interface ClientDetails {
-  alive: boolean;
-  id: string;
-  player: PlayerDetails;
-}
-
 export enum ConnectionStatus {
   Disconnected,
   Connecting,
@@ -100,10 +94,10 @@ export default class Client extends EventEmitter {
     }
   }
 
-  async #identify(player: PlayerDetails, id?: string): Promise<void> {
+  async #register(player: PlayerDetails, id?: string): Promise<void> {
     await this.#closeOnRuntimeError(async () => {
       const response = await this.sendAsync(new Message({
-        type: Message.TYPE_IDENTIFY_PLAYER,
+        type: Message.TYPE_REGISTER_PLAYER,
         data: { ...player, id },
       }));
       if (response.type !== Message.TYPE_CONFIRM || typeof response.data.id !== 'string') {
@@ -149,7 +143,7 @@ export default class Client extends EventEmitter {
 
   async #onOpen(player: PlayerDetails, game: GameDetails | string, id?: string) {
     try {
-      await this.#identify(player, id);
+      await this.#register(player, id);
       const state = typeof game === 'string'
         ? await this.#joinGame(game)
         : await this.#createGame(game);

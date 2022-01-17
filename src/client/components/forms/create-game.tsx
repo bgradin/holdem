@@ -12,13 +12,15 @@ export default function CreateGame({
   const [buttonDisabled, setButtonDisabled] = React.useState(true);
 
   const secretRef = React.useRef<HTMLInputElement>(null);
-  const nameRef = React.useRef<HTMLInputElement>(null);
+  const playerNameRef = React.useRef<HTMLInputElement>(null);
+  const gameNameRef = React.useRef<HTMLInputElement>(null);
   const submitRef = React.useRef<HTMLButtonElement>(null);
 
   const enableSubmitButtonIfNecessary = () => {
     const allValuesProvided = ([
       secretRef,
-      nameRef,
+      gameNameRef,
+      playerNameRef,
     ] as React.RefObject<HTMLInputElement>[])
       .map((ref) => ref.current?.value || '')
       .every((x) => x.length > 0);
@@ -38,12 +40,21 @@ export default function CreateGame({
             onChange={enableSubmitButtonIfNecessary}
           />
         </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicName">
-          <Form.Label>Name</Form.Label>
+        <Form.Group className="mb-3" controlId="formBasicGameName">
+          <Form.Label>Game Name</Form.Label>
           <Form.Control
-            ref={nameRef}
+            ref={gameNameRef}
             type="text"
-            placeholder="Enter name"
+            placeholder="Enter game name"
+            onChange={enableSubmitButtonIfNecessary}
+          />
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="formBasicPlayerName">
+          <Form.Label>Player Name</Form.Label>
+          <Form.Control
+            ref={playerNameRef}
+            type="text"
+            placeholder="Enter player name"
             onChange={enableSubmitButtonIfNecessary}
           />
         </Form.Group>
@@ -55,9 +66,12 @@ export default function CreateGame({
           onClick={
             () => {
               const secret = secretRef.current?.value || '';
-              const name = nameRef.current?.value || '';
-              if (secret.length > 0 && name.length > 0) {
-                client.connect({ name }, { secret });
+              const gameName = gameNameRef.current?.value || '';
+              const playerName = playerNameRef.current?.value || '';
+              if (secret.length > 0
+                && gameName.length > 0
+                && playerName.length > 0) {
+                client.connect({ name: playerName }, { secret, name: gameName });
               }
             }
           }

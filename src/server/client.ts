@@ -13,19 +13,16 @@ export default class Client extends EventEmitter {
   static EVENT_MESSAGE = 'message';
   static EVENT_TERMINATED = 'terminated';
 
-  alive: boolean;
-  id: string;
-  player?: PlayerDetails;
+  connected: boolean;
 
   #client: ws;
   #pongReceived = true;
 
-  constructor(client: ws, id: string) {
+  constructor(client: ws) {
     super();
 
     this.#client = client;
-    this.alive = true;
-    this.id = id;
+    this.connected = true;
 
     this.#client.on('message', this.#onMessage.bind(this));
     this.#client.on('pong', this.#onPong.bind(this));
@@ -45,10 +42,6 @@ export default class Client extends EventEmitter {
   close() {
     this.#client.close();
     this.emit(Client.EVENT_TERMINATED, this);
-  }
-
-  identify(player: PlayerDetails) {
-    this.player = player;
   }
 
   #onClose() {
@@ -75,7 +68,7 @@ export default class Client extends EventEmitter {
 
   #ping() {
     if (!this.#pongReceived) {
-      this.alive = false;
+      this.connected = false;
       this.#client.terminate();
       this.emit(Client.EVENT_TERMINATED);
     }

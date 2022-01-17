@@ -42,8 +42,8 @@ export function parseError(errorSubtype?: string) {
       return 'Game not found!';
     case Errors.INVALID_DATA:
       return 'Invalid data sent to server!';
-    case Errors.PLAYER_MUST_IDENTIFY:
-      return 'Player must identify themself!';
+    case Errors.PLAYER_MUST_REGISTER:
+      return 'Player must register!';
     case Errors.UNEXPECTED_CONFIRMATION_DATA:
       return 'Unexpected confirmation data from server!';
     default:

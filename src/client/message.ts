@@ -8,7 +8,7 @@ export default class Message {
   static TYPE_CREATE_GAME = 'create';
   static TYPE_START_GAME = 'start';
   static TYPE_JOIN_GAME = 'join';
-  static TYPE_IDENTIFY_PLAYER = 'identify';
+  static TYPE_REGISTER_PLAYER = 'register';
   static TYPE_GAME_STATE = 'state';
   static TYPE_CARDS = 'cards';
   static TYPE_BET = 'bet';
