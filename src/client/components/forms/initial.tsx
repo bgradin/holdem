@@ -10,13 +10,30 @@ export default function Initial({
   joinGame,
   createGame,
 }: FormProps) {
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    if (buttonRef.current) {
+      buttonRef.current.focus();
+    }
+  });
+
   return (
     <Modal.Body>
       <Stack gap={2} className="col-md-5 mx-auto">
         <Button
           variant="primary"
           size="lg"
+          ref={buttonRef}
           onClick={joinGame}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter'
+              || event.code === 'Enter'
+              || event.which === 13
+              || event.keyCode === 13) {
+              joinGame();
+            }
+          }}
         >
           Join Game
         </Button>

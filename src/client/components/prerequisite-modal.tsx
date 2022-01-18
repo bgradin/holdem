@@ -31,10 +31,10 @@ export default function PrerequisiteModal({
           />
         </EnumRouter.Route>
         <EnumRouter.Route stateKey={ViewMode.ViewModeJoinGame}>
-          <JoinGame client={client} />
+          <JoinGame client={client} goBack={() => { setMode(ViewMode.ViewModeInitial); }} />
         </EnumRouter.Route>
         <EnumRouter.Route stateKey={ViewMode.ViewModeCreateGame}>
-          <CreateGame client={client} />
+          <CreateGame client={client} goBack={() => { setMode(ViewMode.ViewModeInitial); }} />
         </EnumRouter.Route>
       </EnumRouter>
     </Modal>

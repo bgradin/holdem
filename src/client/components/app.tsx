@@ -30,7 +30,7 @@ export default function App() {
 
   return (
     <>
-      <Game state={gameState} />
+      <Game state={gameState} client={client} />
       {
         !connected && <PrerequisiteModal client={client} />
       }

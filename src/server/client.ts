@@ -1,9 +1,11 @@
 import console from 'console';
 import EventEmitter from 'events';
+import { clearInterval } from 'timers';
 import ws from 'ws';
 import Message from './message';
 
 const PING_INTERVAL = 10000;
+const MAX_TIMEOUT = 10000;
 
 export interface PlayerDetails {
   name: string;
@@ -17,6 +19,8 @@ export default class Client extends EventEmitter {
 
   #client: ws;
   #pongReceived = true;
+  #interval: ReturnType<typeof setInterval>;
+  #internalEmitter = new EventEmitter();
 
   constructor(client: ws) {
     super();
@@ -28,7 +32,7 @@ export default class Client extends EventEmitter {
     this.#client.on('pong', this.#onPong.bind(this));
     this.#client.on('close', this.#onClose.bind(this));
 
-    setInterval(this.#ping.bind(this), PING_INTERVAL);
+    this.#interval = setInterval(this.#ping.bind(this), PING_INTERVAL);
   }
 
   send(message: Message) {
@@ -39,8 +43,38 @@ export default class Client extends EventEmitter {
     }));
   }
 
+  async sendAsync(message: Message, timeout?: number): Promise<Message> {
+    let resolved = false;
+    return new Promise((resolve, reject) => {
+      if (!this.#client) {
+        console.error('Client: Message send failed: No socket available!');
+        reject();
+        return;
+      }
+
+      setTimeout(() => { if (!resolved) reject(); }, timeout || MAX_TIMEOUT);
+      let errorCallback: (errorMessage: Message) => void;
+      const successCallback = (successMessage: Message) => {
+        resolved = true;
+        resolve(successMessage);
+        this.#internalEmitter.off(Message.TYPE_ERROR, errorCallback);
+      };
+      errorCallback = (errorMessage: Message) => {
+        resolved = true;
+        reject(errorMessage);
+        this.#internalEmitter.off(Message.TYPE_CONFIRM, successCallback);
+      };
+
+      this.#internalEmitter.once(Message.TYPE_CONFIRM, successCallback);
+      this.#internalEmitter.once(Message.TYPE_ERROR, errorCallback);
+
+      this.send(message);
+    });
+  }
+
   close() {
     this.#client.close();
+    clearInterval(this.#interval);
     this.emit(Client.EVENT_TERMINATED, this);
   }
 

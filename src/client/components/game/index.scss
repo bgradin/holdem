@@ -1,0 +1,40 @@
+.game {
+  height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+
+  .title-area {
+    display: flex;
+    margin-bottom: 20px;
+
+    .owner-options {
+      display: flex;
+      padding: 0 12px;
+    }
+  }
+
+  .play-area {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    padding: 100px;
+
+    .inner {
+      position: relative;
+      display: flex;
+
+      .spacer {
+        height: 100%;
+      }
+
+      .table-wrapper {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
+    }
+  }
+}

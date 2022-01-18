@@ -46,8 +46,10 @@ export function parseError(errorSubtype?: string) {
       return 'Player must register!';
     case Errors.UNEXPECTED_CONFIRMATION_DATA:
       return 'Unexpected confirmation data from server!';
+    case Errors.GAME_IS_FULL:
+      return 'Game is full!';
     default:
-      return '';
+      return 'An unexpected error occurred!';
   }
 }
 

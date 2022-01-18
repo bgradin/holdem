@@ -6,7 +6,8 @@ interface MessageConfig {
 
 export default class Message {
   static TYPE_CREATE_GAME = 'create';
-  static TYPE_START_GAME = 'start';
+  static TYPE_START_GAME = 'start-game';
+  static TYPE_GAME_CLOSED = 'closed';
   static TYPE_JOIN_GAME = 'join';
   static TYPE_REGISTER_PLAYER = 'register';
   static TYPE_GAME_STATE = 'state';
@@ -14,6 +15,7 @@ export default class Message {
   static TYPE_BET = 'bet';
   static TYPE_CONFIRM = 'confirm';
   static TYPE_ERROR = 'error';
+  static TYPE_START_ROUND = 'start-round';
 
   type: string;
   subtype?: string;

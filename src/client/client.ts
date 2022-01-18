@@ -1,7 +1,7 @@
 import EventEmitter from './event-emitter';
 import { GameDetails, GamePublicState } from './components/game';
 import Message, { ErrorMessage } from './message';
-import { parseCloseEvent, parseError } from './parsing';
+import { parseCloseEvent } from './parsing';
 import Errors from './errors';
 
 const PORT = 3030;
@@ -29,14 +29,34 @@ export default class Client extends EventEmitter {
   #socket?: WebSocket;
   #internalEmitter = new EventEmitter();
 
-  connect(player: PlayerDetails, game: GameDetails | string) {
-    const id = localStorage.getItem(Client.LOCALSTORAGE_KEY_ID);
-    this.#socket = new WebSocket(`ws://${window.location.hostname}:${PORT}`);
-    this.#socket.onopen = () => this.#onOpen(player, game, id || undefined);
-    this.#socket.onmessage = this.#onMessage.bind(this);
-    this.#socket.onclose = this.#onClose.bind(this);
-    this.#socket.onerror = this.#onError.bind(this);
-    this.status = ConnectionStatus.Connecting;
+  async connect(player: PlayerDetails, game: GameDetails | string): Promise<Message | void> {
+    return new Promise((resolve, reject) => {
+      const id = localStorage.getItem(Client.LOCALSTORAGE_KEY_ID);
+      this.#socket = new WebSocket(`ws://${window.location.hostname}:${PORT}`);
+      this.#socket.onmessage = this.#onMessage.bind(this);
+      this.#socket.onclose = this.#onClose.bind(this);
+      this.#socket.onerror = this.#onError.bind(this);
+      this.status = ConnectionStatus.Connecting;
+
+      this.#socket.onopen = async () => {
+        try {
+          const state = await this.#register(player, id || undefined)
+            || (
+              typeof game === 'string'
+                ? await this.#joinGame(game)
+                : await this.#createGame(game)
+            );
+          resolve();
+          this.emit(Message.TYPE_GAME_STATE, new Message({
+            type: Message.TYPE_GAME_STATE,
+            data: { state },
+          }));
+        } catch (obj) {
+          // eslint-disable-next-line prefer-promise-reject-errors
+          reject(obj as ErrorMessage);
+        }
+      };
+    });
   }
 
   send(message: Message) {
@@ -94,18 +114,29 @@ export default class Client extends EventEmitter {
     }
   }
 
-  async #register(player: PlayerDetails, id?: string): Promise<void> {
-    await this.#closeOnRuntimeError(async () => {
+  async #register(player: PlayerDetails, id?: string): Promise<GamePublicState | void> {
+    return this.#closeOnRuntimeError(async () => {
       const response = await this.sendAsync(new Message({
         type: Message.TYPE_REGISTER_PLAYER,
         data: { ...player, id },
       }));
-      if (response.type !== Message.TYPE_CONFIRM || typeof response.data.id !== 'string') {
-        throw new ErrorMessage(Errors.UNEXPECTED_CONFIRMATION_DATA);
-      } else {
+      if (response.type === Message.TYPE_CONFIRM && typeof response.data.id === 'string') {
         this.id = response.data.id as string;
         localStorage.setItem(Client.LOCALSTORAGE_KEY_ID, this.id);
+        return;
       }
+
+      if (id
+        && response.type === Message.TYPE_CONFIRM
+        && response.subtype === Message.TYPE_GAME_STATE
+        && response.data.state) {
+        this.id = id as string;
+        localStorage.setItem(Client.LOCALSTORAGE_KEY_ID, this.id);
+        // eslint-disable-next-line consistent-return
+        return response.data.state as GamePublicState;
+      }
+
+      throw new ErrorMessage(Errors.UNEXPECTED_CONFIRMATION_DATA);
     });
   }
 
@@ -139,22 +170,6 @@ export default class Client extends EventEmitter {
 
   async #onError() {
     this.#close();
-  }
-
-  async #onOpen(player: PlayerDetails, game: GameDetails | string, id?: string) {
-    try {
-      await this.#register(player, id);
-      const state = typeof game === 'string'
-        ? await this.#joinGame(game)
-        : await this.#createGame(game);
-      this.emit(Message.TYPE_GAME_STATE, new Message({
-        type: Message.TYPE_GAME_STATE,
-        data: { state },
-      }));
-    } catch (obj) {
-      const error = obj as ErrorMessage;
-      console.error(`Error (${error.subtype}): ${parseError(error.subtype)}`);
-    }
   }
 
   #onClose(event: CloseEvent) {
