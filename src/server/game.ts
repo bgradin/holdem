@@ -1,9 +1,8 @@
 import fs from 'fs';
 import path from 'path';
-import Message, { ErrorMessage } from './message';
+import Message, { MessageType, ErrorType, ErrorMessage } from './message';
 import Player, { PlayerPublicDetails } from './player';
 import shuffleCards, { Cards } from './cards';
-import Errors from './errors';
 
 const SECRET = fs.readFileSync(path.resolve(__dirname, 'SECRET'), { encoding: 'utf8' });
 const BET_TIMEOUT = 11000;
@@ -51,7 +50,7 @@ async function deal(player: Player, ...cards: Cards): Promise<Message> {
   player.addCards(...cards);
 
   return player.client.sendAsync(new Message({
-    type: Message.TYPE_DEAL,
+    type: MessageType.TYPE_DEAL_PLAYER,
     data: {
       cards: player.cards,
     },
@@ -80,7 +79,7 @@ export default class Game {
     this.name = config.name;
     this.startingChips = config.startingChips;
 
-    this.owner.client.on(Message.TYPE_START_ROUND, this.#startRound.bind(this));
+    this.owner.client.on(MessageType.TYPE_START_ROUND, this.#startRound.bind(this));
 
     this.players.push(this.owner);
   }
@@ -123,7 +122,7 @@ export default class Game {
       .forEach((p) => {
         if (p !== exceptPlayer && p.client.connected) {
           p.client.send(new Message({
-            type: Message.TYPE_GAME_STATE,
+            type: MessageType.TYPE_GAME_UPDATE,
             data: { state },
           }));
         }
@@ -177,7 +176,7 @@ export default class Game {
 
   async #startRound() {
     if (this.players.length < 2) {
-      this.owner.client.send(new ErrorMessage(Errors.TOO_FEW_PLAYERS));
+      this.owner.client.send(new ErrorMessage(ErrorType.TOO_FEW_PLAYERS));
     }
 
     this.#resetGame();
@@ -241,7 +240,7 @@ export default class Game {
           // We want the below code to be blocking
           // eslint-disable-next-line no-await-in-loop
           const response = await this.players[i].client.sendAsync(new Message({
-            type: Message.TYPE_BET,
+            type: MessageType.TYPE_BET,
           }), BET_TIMEOUT);
           this.#handleBet(this.players[i], response.data);
           this.updatePlayers();

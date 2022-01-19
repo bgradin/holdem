@@ -1,8 +1,7 @@
 import EventEmitter from './event-emitter';
 import { GameDetails, GamePublicState } from './components/game';
-import Message, { ErrorMessage } from './message';
+import Message, { MessageType, ErrorType, ErrorMessage } from '../server/message';
 import { parseCloseEvent } from './parsing';
-import Errors from './errors';
 
 const PORT = 3030;
 const MAX_TIMEOUT = 10000;
@@ -47,8 +46,8 @@ export default class Client extends EventEmitter {
                 : await this.#createGame(game)
             );
           resolve();
-          this.emit(Message.TYPE_GAME_STATE, new Message({
-            type: Message.TYPE_GAME_STATE,
+          this.emit(MessageType.TYPE_GAME_UPDATE, new Message({
+            type: MessageType.TYPE_GAME_UPDATE,
             data: { state },
           }));
         } catch (obj) {
@@ -83,16 +82,16 @@ export default class Client extends EventEmitter {
       const successCallback = (successMessage: Message) => {
         resolved = true;
         resolve(successMessage);
-        this.#internalEmitter.off(Message.TYPE_ERROR, errorCallback);
+        this.#internalEmitter.off(MessageType.TYPE_ERROR, errorCallback);
       };
       errorCallback = (errorMessage: Message) => {
         resolved = true;
         reject(errorMessage);
-        this.#internalEmitter.off(Message.TYPE_CONFIRM, successCallback);
+        this.#internalEmitter.off(MessageType.TYPE_CONFIRM, successCallback);
       };
 
-      this.#internalEmitter.one(Message.TYPE_CONFIRM, successCallback);
-      this.#internalEmitter.one(Message.TYPE_ERROR, errorCallback);
+      this.#internalEmitter.one(MessageType.TYPE_CONFIRM, successCallback);
+      this.#internalEmitter.one(MessageType.TYPE_ERROR, errorCallback);
 
       this.send(message);
     });
@@ -117,18 +116,18 @@ export default class Client extends EventEmitter {
   async #register(player: PlayerDetails, id?: string): Promise<GamePublicState | void> {
     return this.#closeOnRuntimeError(async () => {
       const response = await this.sendAsync(new Message({
-        type: Message.TYPE_REGISTER_PLAYER,
+        type: MessageType.TYPE_REGISTER_PLAYER,
         data: { ...player, id },
       }));
-      if (response.type === Message.TYPE_CONFIRM && typeof response.data.id === 'string') {
+      if (response.type === MessageType.TYPE_CONFIRM && typeof response.data.id === 'string') {
         this.id = response.data.id as string;
         localStorage.setItem(Client.LOCALSTORAGE_KEY_ID, this.id);
         return;
       }
 
       if (id
-        && response.type === Message.TYPE_CONFIRM
-        && response.subtype === Message.TYPE_GAME_STATE
+        && response.type === MessageType.TYPE_CONFIRM
+        && response.subtype === MessageType.TYPE_GAME_UPDATE
         && response.data.state) {
         this.id = id as string;
         localStorage.setItem(Client.LOCALSTORAGE_KEY_ID, this.id);
@@ -136,18 +135,18 @@ export default class Client extends EventEmitter {
         return response.data.state as GamePublicState;
       }
 
-      throw new ErrorMessage(Errors.UNEXPECTED_CONFIRMATION_DATA);
+      throw new ErrorMessage(ErrorType.UNEXPECTED_CONFIRMATION_DATA);
     });
   }
 
   async #createGame(game: GameDetails): Promise<GamePublicState> {
     return this.#closeOnRuntimeError(async () => {
       const response = await this.sendAsync(new Message({
-        type: Message.TYPE_CREATE_GAME,
+        type: MessageType.TYPE_CREATE_GAME,
         data: { ...game },
       }));
-      if (response.type !== Message.TYPE_CONFIRM || !response.data.state) {
-        throw new ErrorMessage(Errors.UNEXPECTED_CONFIRMATION_DATA);
+      if (response.type !== MessageType.TYPE_CONFIRM || !response.data.state) {
+        throw new ErrorMessage(ErrorType.UNEXPECTED_CONFIRMATION_DATA);
       } else {
         return response.data.state;
       }
@@ -157,11 +156,11 @@ export default class Client extends EventEmitter {
   async #joinGame(gameId: string): Promise<GamePublicState> {
     return this.#closeOnRuntimeError(async () => {
       const response = await this.sendAsync(new Message({
-        type: Message.TYPE_JOIN_GAME,
+        type: MessageType.TYPE_JOIN_GAME,
         data: { gameId },
       }));
-      if (response.type !== Message.TYPE_CONFIRM || !response.data.state) {
-        throw new ErrorMessage(Errors.UNEXPECTED_CONFIRMATION_DATA);
+      if (response.type !== MessageType.TYPE_CONFIRM || !response.data.state) {
+        throw new ErrorMessage(ErrorType.UNEXPECTED_CONFIRMATION_DATA);
       } else {
         return response.data.state;
       }
@@ -181,7 +180,7 @@ export default class Client extends EventEmitter {
 
   #onMessage(event: MessageEvent<any>) {
     const message = JSON.parse(event.data) as Message;
-    if (message.type === Message.TYPE_CONFIRM || message.type === Message.TYPE_ERROR) {
+    if (message.type === MessageType.TYPE_CONFIRM || message.type === MessageType.TYPE_ERROR) {
       this.#internalEmitter.emit(message.type, message);
     } else {
       this.emit(message.type, message);

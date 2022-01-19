@@ -2,7 +2,7 @@ import console from 'console';
 import EventEmitter from 'events';
 import { clearInterval } from 'timers';
 import ws from 'ws';
-import Message from './message';
+import Message, { MessageType } from './message';
 
 const PING_INTERVAL = 10000;
 const MAX_TIMEOUT = 10000;
@@ -57,16 +57,16 @@ export default class Client extends EventEmitter {
       const successCallback = (successMessage: Message) => {
         resolved = true;
         resolve(successMessage);
-        this.#internalEmitter.off(Message.TYPE_ERROR, errorCallback);
+        this.#internalEmitter.off(MessageType.TYPE_ERROR, errorCallback);
       };
       errorCallback = (errorMessage: Message) => {
         resolved = true;
         reject(errorMessage);
-        this.#internalEmitter.off(Message.TYPE_CONFIRM, successCallback);
+        this.#internalEmitter.off(MessageType.TYPE_CONFIRM, successCallback);
       };
 
-      this.#internalEmitter.once(Message.TYPE_CONFIRM, successCallback);
-      this.#internalEmitter.once(Message.TYPE_ERROR, errorCallback);
+      this.#internalEmitter.once(MessageType.TYPE_CONFIRM, successCallback);
+      this.#internalEmitter.once(MessageType.TYPE_ERROR, errorCallback);
 
       this.send(message);
     });

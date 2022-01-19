@@ -2,11 +2,12 @@ import { IncomingMessage } from 'http';
 import { v4 as uuidv4 } from 'uuid';
 import ws from 'ws';
 import Client from './client';
-import Errors from './errors';
 import Game, { validateGameConfiguration } from './game';
 import Message, {
   ConfirmationMessage,
   ErrorMessage,
+  ErrorType,
+  MessageType,
 } from './message';
 import Player from './player';
 
@@ -33,7 +34,7 @@ function getPlayerId(client: Client) {
 
 function registerPlayer(client: Client, data: any, ip: string) {
   if (!validateClientIdentity) {
-    client.send(new ErrorMessage(Errors.PLAYER_MUST_REGISTER));
+    client.send(new ErrorMessage(ErrorType.PLAYER_MUST_REGISTER));
   } else {
     let derelictClient;
     const id = data.id || newId();
@@ -45,7 +46,7 @@ function registerPlayer(client: Client, data: any, ip: string) {
 
     if (data.id && players[data.id]) {
       if (players[data.id].ip !== ip) {
-        client.send(new ErrorMessage(Errors.INVALID_DATA));
+        client.send(new ErrorMessage(ErrorType.INVALID_DATA));
         return;
       }
 
@@ -59,8 +60,8 @@ function registerPlayer(client: Client, data: any, ip: string) {
       if (activeGameKey) {
         games[activeGameKey].updatePlayers(players[data.id]);
         client.send(new Message({
-          type: Message.TYPE_CONFIRM,
-          subtype: Message.TYPE_GAME_STATE,
+          type: MessageType.TYPE_CONFIRM,
+          subtype: MessageType.TYPE_GAME_UPDATE,
           data: { state: games[activeGameKey].getState() },
         }));
       }
@@ -78,11 +79,11 @@ function registerPlayer(client: Client, data: any, ip: string) {
 function createGame(client: Client, data: any) {
   const playerId = getPlayerId(client);
   if (!validateGameConfiguration(data)) {
-    client.send(new ErrorMessage(Errors.INVALID_DATA));
+    client.send(new ErrorMessage(ErrorType.INVALID_DATA));
   } else if (!playerId) {
-    client.send(new ErrorMessage(Errors.PLAYER_MUST_REGISTER));
+    client.send(new ErrorMessage(ErrorType.PLAYER_MUST_REGISTER));
   } else if (Object.keys(games).some((key) => games[key].players.some((p) => p.id === playerId))) {
-    client.send(new ErrorMessage(Errors.ALREADY_IN_GAME));
+    client.send(new ErrorMessage(ErrorType.ALREADY_IN_GAME));
   } else {
     const id = newId();
     games[id] = new Game(id, players[playerId], data);
@@ -94,18 +95,18 @@ function createGame(client: Client, data: any) {
 function joinGame(client: Client, data: any) {
   const playerId = getPlayerId(client);
   if (typeof data !== 'object') {
-    client.send(new ErrorMessage(Errors.INVALID_DATA));
+    client.send(new ErrorMessage(ErrorType.INVALID_DATA));
   } else if (!playerId) {
-    client.send(new ErrorMessage(Errors.PLAYER_MUST_REGISTER));
+    client.send(new ErrorMessage(ErrorType.PLAYER_MUST_REGISTER));
   } else if (typeof data.gameId !== 'string' || !games[data.gameId]) {
-    client.send(new ErrorMessage(Errors.GAME_NOT_FOUND));
+    client.send(new ErrorMessage(ErrorType.GAME_NOT_FOUND));
   } else if (games[data.gameId].players.length >= MAX_PLAYERS) {
-    client.send(new ErrorMessage(Errors.GAME_IS_FULL));
+    client.send(new ErrorMessage(ErrorType.GAME_IS_FULL));
   } else {
     games[data.gameId].addPlayer(players[playerId]);
     client.send(new Message({
-      type: Message.TYPE_CONFIRM,
-      subtype: Message.TYPE_GAME_STATE,
+      type: MessageType.TYPE_CONFIRM,
+      subtype: MessageType.TYPE_GAME_UPDATE,
       data: { state: games[data.gameId].getState() },
     }));
   }
@@ -120,7 +121,7 @@ function removePlayer(client: Client) {
     if (ownedGameKey) {
       while (games[ownedGameKey].players.length > 1) {
         const player = games[ownedGameKey].players.pop() as Player;
-        player.client.send(new Message({ type: Message.TYPE_GAME_CLOSED }));
+        player.client.send(new Message({ type: MessageType.TYPE_GAME_CLOSED }));
         player.client.close();
         delete players[player.id];
       }
@@ -141,11 +142,11 @@ function start() {
   server.on('connection', (socket, req: IncomingMessage) => {
     const client = new Client(socket);
     client.on(
-      Message.TYPE_REGISTER_PLAYER,
+      MessageType.TYPE_REGISTER_PLAYER,
       (data) => registerPlayer(client, data, req.socket.remoteAddress || ''),
     );
-    client.on(Message.TYPE_CREATE_GAME, (data) => createGame(client, data));
-    client.on(Message.TYPE_JOIN_GAME, (data) => joinGame(client, data));
+    client.on(MessageType.TYPE_CREATE_GAME, (data) => createGame(client, data));
+    client.on(MessageType.TYPE_JOIN_GAME, (data) => joinGame(client, data));
     client.on(Client.EVENT_TERMINATED, removePlayer);
   });
 }

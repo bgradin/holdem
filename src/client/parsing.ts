@@ -1,5 +1,5 @@
 import { ConnectionStatus } from './client';
-import Errors from './errors';
+import { ErrorType } from '../server/message';
 
 export function parseCloseEvent(event: CloseEvent): string {
   switch (event.code) {
@@ -34,19 +34,19 @@ export function parseCloseEvent(event: CloseEvent): string {
   }
 }
 
-export function parseError(errorSubtype?: string) {
+export function parseError(errorSubtype?: ErrorType) {
   switch (errorSubtype) {
-    case Errors.ALREADY_IN_GAME:
+    case ErrorType.ALREADY_IN_GAME:
       return 'Already in game!';
-    case Errors.GAME_NOT_FOUND:
+    case ErrorType.GAME_NOT_FOUND:
       return 'Game not found!';
-    case Errors.INVALID_DATA:
+    case ErrorType.INVALID_DATA:
       return 'Invalid data sent to server!';
-    case Errors.PLAYER_MUST_REGISTER:
+    case ErrorType.PLAYER_MUST_REGISTER:
       return 'Player must register!';
-    case Errors.UNEXPECTED_CONFIRMATION_DATA:
+    case ErrorType.UNEXPECTED_CONFIRMATION_DATA:
       return 'Unexpected confirmation data from server!';
-    case Errors.GAME_IS_FULL:
+    case ErrorType.GAME_IS_FULL:
       return 'Game is full!';
     default:
       return 'An unexpected error occurred!';

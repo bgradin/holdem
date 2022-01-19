@@ -1,8 +1,8 @@
 import * as React from 'react';
 import Client from '../client';
-import Message from '../message';
 import Game from './game';
 import PrerequisiteModal from './prerequisite-modal';
+import Message, { MessageType } from '../../server/message';
 
 let client: Client;
 
@@ -12,13 +12,13 @@ export default function App() {
 
   if (!client) {
     client = new Client();
-    client.on(Message.TYPE_CONFIRM, (message: Message) => {
-      if (message.subtype === Message.TYPE_GAME_STATE) {
+    client.on(MessageType.TYPE_CONFIRM, (message: Message) => {
+      if (message.subtype === MessageType.TYPE_GAME_UPDATE) {
         setConnected(true);
         setGameState(message.data.state);
       }
     });
-    client.on(Message.TYPE_GAME_STATE, (message: Message) => {
+    client.on(MessageType.TYPE_GAME_UPDATE, (message: Message) => {
       setConnected(true);
       setGameState(message.data.state);
     });

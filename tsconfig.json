@@ -7,7 +7,7 @@
         "esModuleInterop": true,
         "noImplicitAny": true,
         "jsx": "react",
-        "rootDir": "src/client"
+        "rootDir": "src"
     },
     "include": ["src/client"]
 }

@@ -1,25 +1,36 @@
+export enum ErrorType {
+  PLAYER_MUST_REGISTER = 'player:register',
+  INVALID_DATA = 'invalid',
+  ALREADY_IN_GAME = 'game:exists',
+  GAME_NOT_FOUND = 'game:missing',
+  GAME_IS_FULL = 'game:full',
+  TOO_FEW_PLAYERS = 'game:players',
+  UNEXPECTED_CONFIRMATION_DATA = 'client:unexpected',
+}
+
+export enum MessageType {
+  TYPE_CREATE_GAME = 'game:create',
+  TYPE_GAME_CLOSED = 'game:closed',
+  TYPE_JOIN_GAME = 'game:join',
+  TYPE_REGISTER_PLAYER = 'player:register',
+  TYPE_GAME_UPDATE = 'game:update',
+  TYPE_DEAL_PLAYER = 'player:deal',
+  TYPE_BET = 'player:bet',
+  TYPE_CONFIRM = 'confirm',
+  TYPE_ERROR = 'error',
+  TYPE_START_ROUND = 'game:start',
+  TYPE_DEAL_GAME = 'game:deal',
+}
+
 interface MessageConfig {
-  type: string;
-  subtype?: string;
+  type: MessageType;
+  subtype?: MessageType | ErrorType;
   data?: any;
 }
 
 export default class Message {
-  static TYPE_CREATE_GAME = 'create';
-  static TYPE_START_GAME = 'start-game';
-  static TYPE_GAME_CLOSED = 'closed';
-  static TYPE_JOIN_GAME = 'join';
-  static TYPE_REGISTER_PLAYER = 'register';
-  static TYPE_GAME_STATE = 'state';
-  static TYPE_CARDS = 'cards';
-  static TYPE_BET = 'bet';
-  static TYPE_CONFIRM = 'confirm';
-  static TYPE_ERROR = 'error';
-  static TYPE_START_ROUND = 'start-round';
-  static TYPE_DEAL = 'deal';
-
-  type: string;
-  subtype?: string;
+  type: MessageType;
+  subtype?: MessageType | ErrorType;
   data?: any;
 
   constructor(config: MessageConfig) {
@@ -32,7 +43,7 @@ export default class Message {
 export class SimpleConfirmationMessage extends Message {
   constructor() {
     super({
-      type: Message.TYPE_CONFIRM,
+      type: MessageType.TYPE_CONFIRM,
     });
   }
 }
@@ -40,16 +51,16 @@ export class SimpleConfirmationMessage extends Message {
 export class ConfirmationMessage extends Message {
   constructor(data: object) {
     super({
-      type: Message.TYPE_CONFIRM,
+      type: MessageType.TYPE_CONFIRM,
       data,
     });
   }
 }
 
 export class ErrorMessage extends Message {
-  constructor(subtype?: string) {
+  constructor(subtype?: MessageType | ErrorType) {
     super({
-      type: Message.TYPE_ERROR,
+      type: MessageType.TYPE_ERROR,
       subtype,
     });
   }
