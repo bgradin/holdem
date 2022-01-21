@@ -6,7 +6,7 @@ import {
   Modal,
 } from 'react-bootstrap';
 import Client from '../../client';
-import { ErrorMessage } from '../../message';
+import { ErrorMessage, ErrorType } from '../../../shared/message';
 import { parseError } from '../../parsing';
 
 interface FormProps {
@@ -86,7 +86,7 @@ export default function JoinGame({
                   if (!message || typeof message.subtype !== 'string') {
                     setError('Error: An unknown error occurred!');
                   } else {
-                    setError(`Error: ${parseError(message.subtype)}`);
+                    setError(`Error: ${parseError(message.subtype as ErrorType)}`);
                   }
                 });
               }

@@ -1,6 +1,7 @@
 import EventEmitter from './event-emitter';
-import { GameDetails, GamePublicState } from './components/game';
-import Message, { MessageType, ErrorType, ErrorMessage } from '../server/message';
+import { GameDetails } from './components/game';
+import { GamePublicState } from '../shared/game-state';
+import Message, { MessageType, ErrorType, ErrorMessage } from '../shared/message';
 import { parseCloseEvent } from './parsing';
 
 const PORT = 3030;

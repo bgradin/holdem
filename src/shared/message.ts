@@ -5,7 +5,7 @@ export enum ErrorType {
   GAME_NOT_FOUND = 'game:missing',
   GAME_IS_FULL = 'game:full',
   TOO_FEW_PLAYERS = 'game:players',
-  UNEXPECTED_CONFIRMATION_DATA = 'client:unexpected',
+  UNEXPECTED_CONFIRMATION_DATA = 'client:blabla',
 }
 
 export enum MessageType {
@@ -58,7 +58,7 @@ export class ConfirmationMessage extends Message {
 }
 
 export class ErrorMessage extends Message {
-  constructor(subtype?: MessageType | ErrorType) {
+  constructor(subtype?: ErrorType) {
     super({
       type: MessageType.TYPE_ERROR,
       subtype,

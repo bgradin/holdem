@@ -2,7 +2,7 @@ import * as React from 'react';
 import Client from '../client';
 import Game from './game';
 import PrerequisiteModal from './prerequisite-modal';
-import Message, { MessageType } from '../../server/message';
+import Message, { MessageType } from '../../shared/message';
 
 let client: Client;
 

@@ -13,6 +13,24 @@
     opacity: 0.5;
   }
 
+  > .timer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(90deg);
+    width: calc(100% + 19px);
+    height: calc(100% + 19px);
+
+    fill: transparent;
+    stroke-width: 6px;
+    stroke-dasharray: 283;
+
+    animation-name: timerAnimation;
+    animation-duration: 10s;
+    animation-timing-function: linear;
+    animation-iteration-count: 1;
+  }
+
   > .details {
     position: absolute;
     top: 50%;
@@ -42,5 +60,25 @@
     > .chips {
       padding: 2px 8px;
     }
+  }
+}
+
+@keyframes timerAnimation {
+  0% {
+    stroke: forestgreen;
+    stroke-dashoffset: 0;
+  }
+
+  37% {
+    stroke: yellow;
+  }
+
+  75% {
+    stroke: red;
+  }
+
+  100% {
+    stroke: red;
+    stroke-dashoffset: 283;
   }
 }

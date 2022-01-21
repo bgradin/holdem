@@ -1,5 +1,5 @@
 import { ConnectionStatus } from './client';
-import { ErrorType } from '../server/message';
+import { ErrorType } from '../shared/message';
 
 export function parseCloseEvent(event: CloseEvent): string {
   switch (event.code) {

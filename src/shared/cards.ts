@@ -1,5 +1,5 @@
-const range9 = [...Object.keys(Array(8))].map((x) => x + 1);
-const suit = [...range9, 'J', 'Q', 'K', 'A'];
+const range10 = [...Object.keys(Array(9))].map((x) => x + 1);
+const suit = [...range10, 'J', 'Q', 'K', 'A'];
 const cards = [
   ...suit.slice().map((x) => `${x}H`),
   ...suit.slice().map((x) => `${x}D`),
@@ -8,7 +8,7 @@ const cards = [
 ];
 
 // Fisher-yates shuffling algorithm
-export default function shuffleCards(): string[] {
+export function shuffleCards(): string[] {
   const deck = cards.slice();
 
   let i = 0;

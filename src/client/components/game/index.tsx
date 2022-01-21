@@ -2,20 +2,13 @@ import * as React from 'react';
 import { Button } from 'react-bootstrap';
 import Table from '../table';
 import Client from '../../client';
-import { PlayerPublicDetails } from '../player';
-import Message from '../../message';
+import Message, { MessageType } from '../../../shared/message';
+import { GamePublicState } from '../../../shared/game-state';
 
 export interface GameDetails {
   secret: string;
   name: string;
   startingChips: number;
-}
-
-export interface GamePublicState {
-  id: string;
-  name: string;
-  ownerId: string,
-  players: PlayerPublicDetails[];
 }
 
 interface GameProps {
@@ -48,7 +41,7 @@ export default function Game({ state, client }: GameProps) {
                 className="owner-option"
                 variant="link"
                 onClick={() => {
-                  client.send(new Message({ type: Message.TYPE_START_ROUND }));
+                  client.send(new Message({ type: MessageType.TYPE_START_ROUND }));
                 }}
               >
                 Start Round
@@ -68,7 +61,7 @@ export default function Game({ state, client }: GameProps) {
           />
 
           <div className="table-wrapper">
-            <Table state={state} />
+            <Table state={state} client={client} />
           </div>
         </div>
       </div>

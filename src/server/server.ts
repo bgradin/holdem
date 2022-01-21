@@ -1,15 +1,15 @@
 import { IncomingMessage } from 'http';
 import { v4 as uuidv4 } from 'uuid';
 import ws from 'ws';
-import Client from './client';
-import Game, { validateGameConfiguration } from './game';
+import Client from 'shared/client';
 import Message, {
   ConfirmationMessage,
   ErrorMessage,
   ErrorType,
   MessageType,
-} from './message';
-import Player from './player';
+} from 'shared/message';
+import Player from 'shared/player';
+import Game, { validateGameConfiguration } from './game';
 
 const MAX_PLAYERS = 9;
 
