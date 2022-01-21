@@ -1,6 +1,6 @@
-import { Cards } from './cards';
-import Client from './client';
-import { BetAction } from './game-state';
+import { Cards } from '../cards';
+import Client from '../client';
+import { BetAction } from '../game-state';
 
 export interface PlayerPublicDetails {
   name: string;

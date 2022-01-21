@@ -129,11 +129,14 @@ export default class Game {
   }
 
   #nextActivePlayerIndex(index: number): number {
-    let i = index + 1;
-    while (i !== index || this.players[i].afk || !this.players[i].client.connected) {
-      i = this.players.length - 1 ? 0 : i + 1;
+    for (let i = 0; i < this.players.length; i += 1) {
+      const playerIndex = (i + index + 1) % this.players.length;
+      const player = this.players[playerIndex];
+      if (!player.afk && player.client.connected) {
+        return playerIndex;
+      }
     }
-    return i;
+    return (index + 1) % this.players.length;
   }
 
   #resetGame() {

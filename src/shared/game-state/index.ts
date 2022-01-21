@@ -1,5 +1,5 @@
-import { Cards } from './cards';
-import { PlayerPublicDetails } from './player';
+import { Cards } from '../cards';
+import { PlayerPublicDetails } from '../player';
 
 export enum GameStatus {
   INTERMISSION,

@@ -9,5 +9,6 @@
         "jsx": "react",
         "rootDir": "src"
     },
-    "include": ["src/client"]
+    "include": ["src/client"],
+    "exclude": ["**/node_modules/**"]
 }

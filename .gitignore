@@ -3,6 +3,7 @@ node_modules/
 
 # Build artifacts
 src/client/public/
+dist/
 
 # Logs
 yarn-error.log

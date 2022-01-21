@@ -2,14 +2,10 @@ import console from 'console';
 import EventEmitter from 'events';
 import { clearInterval } from 'timers';
 import ws from 'ws';
-import Message, { MessageType } from './message';
+import Message, { MessageType } from '../Message';
 
 const PING_INTERVAL = 10000;
 const MAX_TIMEOUT = 10000;
-
-export interface PlayerDetails {
-  name: string;
-}
 
 export default class Client extends EventEmitter {
   static EVENT_MESSAGE = 'message';
