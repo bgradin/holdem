@@ -9,6 +9,7 @@ class Player {
         this.folded = false;
         this.id = details.id;
         this.ip = details.ip;
+        this.publicId = details.publicId;
         this.name = details.name;
         this.client = client;
     }

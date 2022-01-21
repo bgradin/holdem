@@ -21,10 +21,10 @@ export function validateGameConfiguration(data: any): boolean {
     && data.startingChips > 0;
 }
 
-async function deal(player: Player, ...cards: Cards): Promise<Message> {
+function deal(player: Player, ...cards: Cards) {
   player.addCards(...cards);
 
-  return player.client.sendAsync(new Message({
+  player.client.send(new Message({
     type: MessageType.TYPE_DEAL_PLAYER,
     data: {
       cards: player.cards,
@@ -110,13 +110,14 @@ export default class Game {
       status: this.status,
       name: this.name,
       ownerId: this.owner.id,
-      smallBlindId: this.players[this.smallBlindIndex].id,
-      largeBlindId: this.players[this.largeBlindIndex].id,
+      smallBlindId: this.players[this.smallBlindIndex].publicId,
+      largeBlindId: this.players[this.largeBlindIndex].publicId,
       currentBetId: this.currentBetId,
       pot: this.pot,
       bet: this.bet,
       cards: this.cards,
       players: this.players.map((player) => ({
+        id: player.publicId,
         name: player.name,
         chips: player.chips,
         bet: player.bet,
@@ -148,6 +149,7 @@ export default class Game {
     for (let i = 0; i < this.players.length; i += 1) {
       this.players[i].folded = false;
       this.players[i].bet = 0;
+      this.players[i].cards = [];
       delete this.players[i].latestAction;
     }
   }
@@ -161,13 +163,13 @@ export default class Game {
     this.#resetGame();
 
     try {
-      await this.#deal();
+      this.#deal();
       await this.#takeBets();
-      await this.#dealFlop();
+      this.#dealFlop();
       await this.#takeBets();
-      await this.#dealCard();
+      this.#dealCard();
       await this.#takeBets();
-      await this.#dealCard();
+      this.#dealCard();
       await this.#takeBets();
       await this.#endRound();
       await this.#incrementBlindsAndDealer();
@@ -176,20 +178,17 @@ export default class Game {
     }
   }
 
-  async #dealAllPlayers(fn: () => Cards) {
-    const promises: Promise<Message>[] = [];
+  #dealAllPlayers(fn: () => Cards) {
     for (let i = 0; i < this.players.length; i += 1) {
-      promises.push(deal(
+      deal(
         this.players[i],
         ...fn(),
-      ));
+      );
     }
-
-    return Promise.all(promises);
   }
 
-  async #deal() {
-    return this.#dealAllPlayers(() => [
+  #deal() {
+    this.#dealAllPlayers(() => [
       this.deck.pop() as string, // Ugly, but guaranteed to be safe
       this.deck.pop() as string,
     ]);
@@ -211,21 +210,25 @@ export default class Game {
 
   async #takeBets() {
     const leftOfDealer = this.#nextActivePlayerIndex(this.dealerIndex);
-    for (let i = leftOfDealer; i !== leftOfDealer; i = i !== this.players.length - 1 ? i + 1 : 0) {
-      const player = this.players[i];
+    for (let i = 0; i < this.players.length; i += 1) {
+      const player = this.players[(i + leftOfDealer) % this.players.length];
       if (!player.folded) {
         if (this.bet && (player.afk || !player.client.connected)) {
           this.#handleBet(player, { action: BetAction.FOLD });
         } else {
-          this.currentBetId = this.players[i].id;
+          this.currentBetId = this.players[i].publicId;
           this.updatePlayers();
 
-          // We want the below code to be blocking
-          // eslint-disable-next-line no-await-in-loop
-          const response = await this.players[i].client.sendAsync(new Message({
-            type: MessageType.TYPE_BET,
-          }), BET_TIMEOUT);
-          this.#handleBet(this.players[i], response.data);
+          try {
+            // We want the below code to be blocking
+            // eslint-disable-next-line no-await-in-loop
+            const response = await this.players[i].client.sendAsync(new Message({
+              type: MessageType.TYPE_BET,
+            }), BET_TIMEOUT);
+            this.#handleBet(this.players[i], response.data);
+          } catch {
+            this.#handleBet(this.players[i], { action: BetAction.FOLD });
+          }
           this.updatePlayers();
         }
       }

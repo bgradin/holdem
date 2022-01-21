@@ -3,6 +3,7 @@ import Client from '../client';
 import { BetAction } from '../game-state';
 
 export interface PlayerPublicDetails {
+  id: string;
   name: string;
   chips: number;
   bet: number,
@@ -14,12 +15,14 @@ export interface PlayerPublicDetails {
 
 export interface PlayerDetails {
   id: string;
+  publicId: string;
   ip: string;
   name: string;
 }
 
 export default class Player {
   id: string;
+  publicId: string;
   ip: string;
   name: string;
   chips = 0;
@@ -33,6 +36,7 @@ export default class Player {
   constructor(details: PlayerDetails, client: Client) {
     this.id = details.id;
     this.ip = details.ip;
+    this.publicId = details.publicId;
     this.name = details.name;
     this.client = client;
   }

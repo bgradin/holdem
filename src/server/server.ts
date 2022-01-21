@@ -40,6 +40,7 @@ function registerPlayer(client: Client, data: any, ip: string) {
     const id = data.id || newId();
     const player = new Player({
       id,
+      publicId: newId(),
       ip,
       name: data.name,
     }, client);

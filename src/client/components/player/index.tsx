@@ -1,26 +1,19 @@
 import * as React from 'react';
-import Client from '../../client';
-import { GamePublicState } from '../../../shared/game-state';
-
-export interface PlayerPublicDetails {
-  name: string;
-  chips: number;
-  connected: boolean;
-}
+import { GamePublicState } from 'shared/game-state';
+import { PlayerPublicDetails } from 'shared/player';
 
 interface PlayerProps {
-  client: Client;
   state: GamePublicState;
   details: PlayerPublicDetails;
 }
 
-export default function Player({ client, state, details }: PlayerProps) {
+export default function Player({ state, details }: PlayerProps) {
   const connectionStateClass = details.connected ? 'connected' : 'disconnected';
 
   return (
     <div className={`player ${connectionStateClass}`}>
       {
-        state.currentBetId && state.currentBetId === client.id && (
+        state.currentBetId && state.currentBetId === details.id && (
           <svg
             className="timer"
             viewBox="0 0 100 100"

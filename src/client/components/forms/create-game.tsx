@@ -5,8 +5,8 @@ import {
   Form,
   Modal,
 } from 'react-bootstrap';
+import { ErrorMessage, ErrorType } from 'shared/message';
 import Client from '../../client';
-import { ErrorMessage, ErrorType } from '../../../shared/message';
 import { parseError } from '../../parsing';
 
 interface FormProps {
