@@ -195,7 +195,7 @@ export default class Game {
   }
 
   #dealFlop() {
-    this.cards.concat([
+    this.cards = this.cards.concat([
       this.deck.pop() as string,
       this.deck.pop() as string,
       this.deck.pop() as string,
@@ -216,18 +216,20 @@ export default class Game {
         if (this.bet && (player.afk || !player.client.connected)) {
           this.#handleBet(player, { action: BetAction.FOLD });
         } else {
-          this.currentBetId = this.players[i].publicId;
+          this.currentBetId = player.publicId;
           this.updatePlayers();
 
           try {
             // We want the below code to be blocking
             // eslint-disable-next-line no-await-in-loop
-            const response = await this.players[i].client.sendAsync(new Message({
+            const response = await player.client.sendAsync(new Message({
               type: MessageType.TYPE_BET,
             }), BET_TIMEOUT);
-            this.#handleBet(this.players[i], response.data);
+            this.#handleBet(player, response.data);
           } catch {
-            this.#handleBet(this.players[i], { action: BetAction.FOLD });
+            this.#handleBet(player, {
+              action: this.bet ? BetAction.FOLD : BetAction.CHECK,
+            });
           }
           this.updatePlayers();
         }
