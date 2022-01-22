@@ -1,4 +1,4 @@
-const range10 = [...Object.keys(Array(10).keys())].map((x) => x + 1);
+const range10 = [...Array(10).keys()].map((x) => x + 1);
 const suit = [...range10, 'J', 'Q', 'K', 'A'];
 const cards = [
   ...suit.slice().map((x) => `${x}H`),
