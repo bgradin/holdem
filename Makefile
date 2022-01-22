@@ -3,10 +3,10 @@
 .PHONY: dependencies dev build
 
 dependencies:
-	npm i && cd src/client && npm i && cd ../server && npm i && cd ../shared && npm i
+	yarn
 
 dev: dependencies
-	npm run dev
+	yarn dev
 
 build: dependencies
-	npm run build
+	yarn build
