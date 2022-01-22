@@ -6,6 +6,12 @@
   "repository": "git@github.com:bgradin/holdem.git",
   "author": "Brian Gradin <gradinafrica@yahoo.com>",
   "license": "MIT",
+  "private": "true",
+  "workspaces": [
+    "src/client",
+    "src/server",
+    "src/shared"
+  ],
   "scripts": {
     "dev": "ts-node scripts/build.ts",
     "build": "PRODUCTION=true ts-node scripts/build.ts"
