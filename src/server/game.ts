@@ -165,16 +165,26 @@ export default class Game {
     try {
       this.#deal();
       await this.#takeBets();
-      this.#dealFlop();
-      await this.#takeBets();
-      this.#dealCard();
-      await this.#takeBets();
-      this.#dealCard();
-      await this.#takeBets();
-      await this.#endRound();
-      await this.#incrementBlindsAndDealer();
+
+      if (this.players.filter((x) => !x.folded).length > 1) {
+        this.#dealFlop();
+        await this.#takeBets();
+      }
+
+      if (this.players.filter((x) => !x.folded).length > 1) {
+        this.#dealCard();
+        await this.#takeBets();
+      }
+
+      if (this.players.filter((x) => !x.folded).length > 1) {
+        this.#dealCard();
+        await this.#takeBets();
+      }
     } catch (err) {
       console.error(err);
+    } finally {
+      await this.#endRound();
+      await this.#incrementBlindsAndDealer();
     }
   }
 
