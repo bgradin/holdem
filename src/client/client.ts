@@ -1,7 +1,7 @@
+import { BetAction, GamePublicState } from 'shared/game-state';
+import Message, { MessageType, ErrorType, ErrorMessage } from 'shared/message';
 import EventEmitter from './event-emitter';
 import { GameDetails } from './components/game';
-import { GamePublicState } from '../shared/game-state';
-import Message, { MessageType, ErrorType, ErrorMessage } from '../shared/message';
 import { parseCloseEvent } from './parsing';
 
 const PORT = 3030;
@@ -23,6 +23,7 @@ export default class Client extends EventEmitter {
   static EVENT_TERMINATED = 'terminated';
 
   id?: string;
+  publicId?: string;
   player?: PlayerDetails;
   status = ConnectionStatus.Disconnected;
 
@@ -67,6 +68,47 @@ export default class Client extends EventEmitter {
         data: message.data,
       }));
     }
+  }
+
+  check() {
+    this.send(new Message({
+      type: MessageType.TYPE_CONFIRM,
+      subtype: MessageType.TYPE_BET,
+      data: {
+        action: BetAction.CHECK,
+      },
+    }));
+  }
+
+  fold() {
+    this.send(new Message({
+      type: MessageType.TYPE_CONFIRM,
+      subtype: MessageType.TYPE_BET,
+      data: {
+        action: BetAction.FOLD,
+      },
+    }));
+  }
+
+  call() {
+    this.send(new Message({
+      type: MessageType.TYPE_CONFIRM,
+      subtype: MessageType.TYPE_BET,
+      data: {
+        action: BetAction.CALL,
+      },
+    }));
+  }
+
+  raise(amount: number) {
+    this.send(new Message({
+      type: MessageType.TYPE_CONFIRM,
+      subtype: MessageType.TYPE_BET,
+      data: {
+        action: BetAction.RAISE,
+        amount,
+      },
+    }));
   }
 
   async sendAsync(message: Message): Promise<Message> {
@@ -120,8 +162,11 @@ export default class Client extends EventEmitter {
         type: MessageType.TYPE_REGISTER_PLAYER,
         data: { ...player, id },
       }));
-      if (response.type === MessageType.TYPE_CONFIRM && typeof response.data.id === 'string') {
+      if (response.type === MessageType.TYPE_CONFIRM
+        && typeof response.data.id === 'string'
+        && typeof response.data.publicId === 'string') {
         this.id = response.data.id as string;
+        this.publicId = response.data.publicId as string;
         localStorage.setItem(Client.LOCALSTORAGE_KEY_ID, this.id);
         return;
       }

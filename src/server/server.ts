@@ -68,7 +68,7 @@ function registerPlayer(client: Client, data: any, ip: string) {
       }
     } else {
       players[player.id] = player;
-      client.send(new ConfirmationMessage({ id }));
+      client.send(new ConfirmationMessage({ id, publicId: player.publicId }));
     }
 
     if (derelictClient) {

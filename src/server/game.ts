@@ -183,8 +183,9 @@ export default class Game {
     } catch (err) {
       console.error(err);
     } finally {
-      await this.#endRound();
-      await this.#incrementBlindsAndDealer();
+      this.#endRound();
+      this.#incrementBlindsAndDealer();
+      this.updatePlayers();
     }
   }
 
@@ -235,6 +236,9 @@ export default class Game {
             const response = await player.client.sendAsync(new Message({
               type: MessageType.TYPE_BET,
             }), BET_TIMEOUT);
+            if (response.subtype !== MessageType.TYPE_BET) {
+              throw new Error();
+            }
             this.#handleBet(player, response.data);
           } catch {
             this.#handleBet(player, {
@@ -257,7 +261,7 @@ export default class Game {
   }
 
   #handleBet(player: Player, data: any) {
-    const betAction = data.action
+    const betAction = typeof data.action === 'number'
       ? data.action as BetAction
       : BetAction.FOLD;
 
@@ -284,7 +288,7 @@ export default class Game {
 
   // eslint-disable-next-line class-methods-use-this
   async #endRound() {
-    // Evaluate hands and payout winner
+    this.status = GameStatus.INTERMISSION;
   }
 
   async #incrementBlindsAndDealer() {

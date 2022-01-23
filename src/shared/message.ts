@@ -20,6 +20,7 @@ export enum MessageType {
   TYPE_ERROR = 'error',
   TYPE_START_ROUND = 'game:start',
   TYPE_DEAL_GAME = 'game:deal',
+  TYPE_AFK = 'player:afk',
 }
 
 interface MessageConfig {

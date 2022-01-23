@@ -54,4 +54,40 @@ $playerSize: 120px;
   @for $i from 1 through 9 {
     @include player-on-circle($i);
   }
+
+  .actions {
+    position: absolute;
+    top: 75%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    border: none;
+
+    .btn-outline-dark:not(.active) {
+      background-color: white;
+      color: black;
+      margin: 4px;
+      filter: none;
+    }
+
+    input[type='range'] {
+      border: none;
+      width: 120px;
+      margin: 4px;
+      padding-top: 16px;
+      background: none;
+    }
+
+    .raiseButton {
+      width: 120px;
+    }
+
+    .form-switch {
+      display: inline-block;
+
+      label {
+        padding: 0;
+      }
+    }
+  }
 }

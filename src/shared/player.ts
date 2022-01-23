@@ -1,6 +1,7 @@
 import { Cards } from './cards';
 import Client from './client';
 import { BetAction } from './game-state';
+import { MessageType } from './message';
 
 export interface PlayerPublicDetails {
   id: string;
@@ -39,6 +40,10 @@ export default class Player {
     this.publicId = details.publicId;
     this.name = details.name;
     this.client = client;
+
+    this.client.on(MessageType.TYPE_AFK, (data) => {
+      this.afk = !!data.afk;
+    });
   }
 
   setChips(chips: number) {

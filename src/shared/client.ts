@@ -83,7 +83,11 @@ export default class Client extends EventEmitter {
     try {
       const json = JSON.parse(message.toString('utf8'));
       if (typeof json.type === 'string' && (!json.data || typeof json.data === 'object')) {
-        this.emit(json.type, json.data);
+        if (json.type === MessageType.TYPE_CONFIRM || json.type === MessageType.TYPE_ERROR) {
+          this.#internalEmitter.emit(json.type, json);
+        } else {
+          this.emit(json.type, json.data);
+        }
       } else {
         throw new Error();
       }
