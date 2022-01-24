@@ -5,7 +5,7 @@ interface CardSvgs {
   [key: string]: () => any;
 }
 
-const svgs: CardSvgs = {
+export const cardSvgs: CardSvgs = {
   '2C': require('../../images/cards/2C.svg').default,
   '2D': require('../../images/cards/2D.svg').default,
   '2H': require('../../images/cards/2H.svg').default,
@@ -65,7 +65,7 @@ interface CardProps {
 }
 
 export default function Card({ code }: CardProps) {
-  const svg = svgs[code];
+  const svg = cardSvgs[code];
   if (!svg) {
     console.error(`Could not find code ${code}`);
   }

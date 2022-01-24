@@ -5,6 +5,7 @@ import { GamePublicState, GameStatus } from 'shared/game-state';
 import Message, { MessageType } from 'shared/message';
 import Client from '../../client';
 import Player from '../player';
+import { cardSvgs } from '../card';
 
 interface TableProps {
   client: Client;
@@ -58,6 +59,17 @@ export default function Table({ client, state }: TableProps) {
                 </div>
               ))
             }
+          </div>
+        )
+      }
+      {
+        state && state.cards && (
+          <div className="cards">
+            {state.cards.map((card) => (
+              <div className="card">
+                {cardSvgs[card]()}
+              </div>
+            ))}
           </div>
         )
       }
