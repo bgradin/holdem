@@ -55,7 +55,7 @@ $playerSize: 120px;
     @include player-on-circle($i);
   }
 
-  .cards {
+  > .cards {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -66,8 +66,8 @@ $playerSize: 120px;
 
     .card {
       display: inline-block;
-      width: 15%;
-      height: 15%;
+      width: 14%;
+      height: 14%;
       margin: 0 4px;
 
       svg {
