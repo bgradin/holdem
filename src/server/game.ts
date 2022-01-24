@@ -141,9 +141,7 @@ export default class Game {
   }
 
   #resetGame() {
-    this.status = GameStatus.ACTIVE;
     this.pot = 0;
-    this.deck = shuffleCards();
     this.cards = [];
 
     for (let i = 0; i < this.players.length; i += 1) {
@@ -160,7 +158,8 @@ export default class Game {
       return;
     }
 
-    this.#resetGame();
+    this.status = GameStatus.ACTIVE;
+    this.deck = shuffleCards();
 
     try {
       this.#deal();
@@ -185,6 +184,7 @@ export default class Game {
     } finally {
       this.#endRound();
       this.#incrementBlindsAndDealer();
+      this.#resetGame();
       this.updatePlayers();
     }
   }
@@ -289,6 +289,12 @@ export default class Game {
   // eslint-disable-next-line class-methods-use-this
   async #endRound() {
     this.status = GameStatus.INTERMISSION;
+
+    for (let i = 0; i < this.players.length; i += 1) {
+      this.players[i].client.send(new Message({
+        type: MessageType.TYPE_END_GAME,
+      }));
+    }
   }
 
   async #incrementBlindsAndDealer() {

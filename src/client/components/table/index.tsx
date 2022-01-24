@@ -53,7 +53,7 @@ export default function Table({ client, state }: TableProps) {
               state.players.map((p) => (
                 <div key={uuidv4()} className="player-positioner">
                   <div className="player-wrapper">
-                    <Player details={p} state={state} />
+                    <Player client={client} details={p} state={state} />
                   </div>
                 </div>
               ))

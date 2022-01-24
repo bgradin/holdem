@@ -19,8 +19,8 @@ export enum MessageType {
   TYPE_CONFIRM = 'confirm',
   TYPE_ERROR = 'error',
   TYPE_START_ROUND = 'game:start',
-  TYPE_DEAL_GAME = 'game:deal',
   TYPE_AFK = 'player:afk',
+  TYPE_END_GAME = 'game:end',
 }
 
 interface MessageConfig {

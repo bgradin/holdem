@@ -7,7 +7,8 @@
         "esModuleInterop": true,
         "noImplicitAny": true,
         "jsx": "react",
-        "rootDir": "src"
+        "rootDir": "src",
+        "typeRoots": ["./node_modules/@types", "./types"]
     },
     "include": ["src/client"],
     "exclude": ["**/node_modules/**"]

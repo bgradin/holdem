@@ -1,13 +1,17 @@
 import * as React from 'react';
 import { GamePublicState } from 'shared/game-state';
 import { PlayerPublicDetails } from 'shared/player';
+import { v4 as uuidv4 } from 'uuid';
+import Card from '../card';
+import Client from '../../client';
 
 interface PlayerProps {
+  client: Client;
   state: GamePublicState;
   details: PlayerPublicDetails;
 }
 
-export default function Player({ state, details }: PlayerProps) {
+export default function Player({ client, state, details }: PlayerProps) {
   const connectionStateClass = details.connected ? 'connected' : 'disconnected';
 
   return (
@@ -36,6 +40,19 @@ export default function Player({ state, details }: PlayerProps) {
           {details.chips}
         </div>
       </div>
+      {
+        details.id === client.publicId && (
+          <div className="cards">
+            {
+              client.cards && client.cards.map((card) => (
+                <div key={uuidv4()} className="card-wrapper">
+                  <Card code={card} />
+                </div>
+              ))
+            }
+          </div>
+        )
+      }
     </div>
   );
 }

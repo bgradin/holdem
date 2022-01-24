@@ -1,5 +1,5 @@
-const range10 = [...Array(10).keys()].map((x) => x + 1);
-const suit = [...range10, 'J', 'Q', 'K', 'A'];
+const range9 = [...Array(9).keys()].map((x) => x + 2);
+const suit = [...range9, 'J', 'Q', 'K', 'A'];
 const cards = [
   ...suit.slice().map((x) => `${x}H`),
   ...suit.slice().map((x) => `${x}D`),

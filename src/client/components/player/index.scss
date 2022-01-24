@@ -61,6 +61,33 @@
       padding: 2px 8px;
     }
   }
+
+  .cards {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    text-align: center;
+
+    .card-wrapper {
+      display: inline-block;
+      margin: 0 4px;
+
+      .card {
+        height: 80px;
+        border: none;
+        background: none;
+        display: inline-block;
+        width: 48px;
+
+        svg {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
 }
 
 @keyframes timerAnimation {

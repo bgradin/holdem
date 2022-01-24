@@ -21,6 +21,7 @@
     "esbuild": "^0.14.11",
     "esbuild-copy-static-files": "^0.1.0",
     "esbuild-plugin-sass": "^1.0.1",
+    "esbuild-plugin-svgr": "^1.0.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4",
     "uuid": "^8.3.2"

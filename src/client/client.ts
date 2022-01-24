@@ -1,3 +1,4 @@
+import { Cards } from 'shared/cards';
 import { BetAction, GamePublicState } from 'shared/game-state';
 import Message, { MessageType, ErrorType, ErrorMessage } from 'shared/message';
 import EventEmitter from './event-emitter';
@@ -25,6 +26,7 @@ export default class Client extends EventEmitter {
   id?: string;
   publicId?: string;
   player?: PlayerDetails;
+  cards?: Cards;
   status = ConnectionStatus.Disconnected;
 
   #socket?: WebSocket;
@@ -228,8 +230,16 @@ export default class Client extends EventEmitter {
     const message = JSON.parse(event.data) as Message;
     if (message.type === MessageType.TYPE_CONFIRM || message.type === MessageType.TYPE_ERROR) {
       this.#internalEmitter.emit(message.type, message);
+    } else if (message.type === MessageType.TYPE_DEAL_PLAYER
+      && Array.isArray(message.data.cards)
+      && message.data.cards.every((card: any) => typeof card === 'string')) {
+      this.cards = message.data.cards;
     } else {
       this.emit(message.type, message);
+    }
+
+    if (message.type === MessageType.TYPE_END_GAME) {
+      this.cards = [];
     }
   }
 }

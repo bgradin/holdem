@@ -4,6 +4,7 @@ import http from 'http';
 import path from 'path';
 import * as esbuild from 'esbuild';
 import sassPlugin from 'esbuild-plugin-sass';
+import svgPlugin from 'esbuild-plugin-svgr';
 
 const copyStaticFiles = require('esbuild-copy-static-files');
 
@@ -31,6 +32,7 @@ esbuild.build({
       force: true,
     }),
     sassPlugin(),
+    svgPlugin(),
   ],
 }).then((value: void | esbuild.BuildResult | null) => {
   if (value && value.errors && value.errors.length > 0) {
