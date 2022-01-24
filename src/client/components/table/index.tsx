@@ -66,7 +66,7 @@ export default function Table({ client, state }: TableProps) {
         state && state.cards && (
           <div className="cards">
             {state.cards.map((card) => (
-              <div className="card">
+              <div key={uuidv4()} className="card">
                 {cardSvgs[card]()}
               </div>
             ))}
