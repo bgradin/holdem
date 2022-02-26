@@ -1,5 +1,3 @@
-@use "sass:math";
-
 $bodyPadding: 12px * 2;
 $tableMargin: 50px * 2;
 $playerSize: 120px;
@@ -7,7 +5,7 @@ $playerSize: 120px;
 @mixin player-on-circle($count) {
   &-size-#{$count} {
     > .players > .player-positioner {
-      $angle: #{math.div(360, $count)};
+      $angle: calc(360 / $count);
 
       $rot: 0;
 
