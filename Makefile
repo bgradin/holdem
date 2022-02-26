@@ -11,7 +11,7 @@ build: dependencies
 	yarn build
 
 package: dependencies
-	docker build -t $(SERVER_IMAGE) .
+	docker build -t $(SERVER_IMAGE) src/server
 
 dependencies:
 	yarn
