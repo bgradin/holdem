@@ -2,7 +2,7 @@ SERVER_IMAGE = holdem-server
 
 .DEFAULT_GOAL := dev
 
-.PHONY: dependencies dev build package help
+.PHONY: dev build package help
 
 dev: dependencies
 	yarn dev
@@ -11,9 +11,9 @@ build: dependencies
 	yarn build
 
 package: dependencies
-	docker build -t $(SERVER_IMAGE) src/server
+	docker build -t $(SERVER_IMAGE) -f src/server/Dockerfile .
 
-dependencies:
+dependencies: yarn.lock
 	yarn
 
 help: ## List available make commands

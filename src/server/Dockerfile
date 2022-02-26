@@ -1,9 +1,8 @@
-FROM node:17
+FROM node:17-alpine
 
-RUN npm i typescript ts-node
+COPY src/server .
+COPY node_modules node_modules
 
-COPY . .
-
-EXPOSE 80
+EXPOSE 3030
 
 CMD yarn start
