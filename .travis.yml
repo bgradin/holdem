@@ -1,0 +1,30 @@
+language: node_js
+node_js:
+  - "10"
+
+sudo: required
+
+cache: yarn
+
+jobs:
+  include:
+    - stage: build
+      script:
+        - yarn
+        - yarn build
+      before_deploy: sudo apt-get update && sudo apt-get install -y sshpass
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: make package &&
+          make build &&
+          docker login www.gradinware.com --username '${REGISTRY_USERNAME}' --password '${REGISTRY_PASSWORD}' &&
+          docker tag holdem-server www.gradinware.com/holdem/server:latest &&
+          docker push www.gradinware.com/holdem/server:latest &&
+          sshpass -p ${SFTP_PASSWORD} ssh -p 2345 -oStrictHostKeyChecking=no ${SFTP_USER}@${SFTP_HOST} "mkdir -p src/ui/public/holdem" &&
+          sshpass -p ${SFTP_PASSWORD} scp -P 2345 -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null src/client/public/* ${SFTP_USER}@${SFTP_HOST}:src/ui/public/holdem
+        on:
+          tags: true
+
+stages:
+  - build

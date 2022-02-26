@@ -6,7 +6,6 @@ To run server + client in dev mode: `make dev`
 
 TODO:
 
-- Setup CI
 - Finish game
 - ?
 - Profit 🤑
