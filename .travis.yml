@@ -21,8 +21,8 @@ jobs:
           docker login www.gradinware.com --username '${REGISTRY_USERNAME}' --password '${REGISTRY_PASSWORD}' &&
           docker tag holdem-server www.gradinware.com/holdem/server:latest &&
           docker push www.gradinware.com/holdem/server:latest &&
-          sshpass -p ${SFTP_PASSWORD} ssh -p 2345 -oStrictHostKeyChecking=no ${SFTP_USER}@${SFTP_HOST} "mkdir -p src/ui/public/holdem" &&
-          sshpass -p ${SFTP_PASSWORD} scp -P 2345 -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null src/client/public/* ${SFTP_USER}@${SFTP_HOST}:src/ui/public/holdem
+          sshpass -p ${SFTP_PASSWORD} ssh -p 2345 -oStrictHostKeyChecking=no ${SFTP_USER}@${SFTP_HOST} "mkdir -p /var/www/html/holdem" &&
+          sshpass -p ${SFTP_PASSWORD} scp -P 2345 -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null src/client/public/* ${SFTP_USER}@${SFTP_HOST}:/var/www/html/holdem
         on:
           tags: true
 
