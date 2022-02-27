@@ -35,7 +35,7 @@ export default class Client extends EventEmitter {
   async connect(player: PlayerDetails, game: GameDetails | string): Promise<Message | void> {
     return new Promise((resolve, reject) => {
       const id = localStorage.getItem(Client.LOCALSTORAGE_KEY_ID);
-      const wsProtocol = window.location.protocol === 'https' ? 'wss' : 'ws';
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
       this.#socket = new WebSocket(`${wsProtocol}://${window.location.hostname}:${PORT}`);
       this.#socket.onmessage = this.#onMessage.bind(this);
       this.#socket.onclose = this.#onClose.bind(this);
