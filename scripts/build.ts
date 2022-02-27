@@ -24,7 +24,7 @@ esbuild.build({
     },
   },
   minify: !!process.env.PRODUCTION,
-  sourcemap: true,
+  sourcemap: !process.env.PRODUCTION,
   plugins: [
     copyStaticFiles({
       src: 'src/client/index.html',
