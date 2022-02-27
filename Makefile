@@ -11,7 +11,7 @@ build: dependencies
 	yarn build
 
 package: dependencies
-	docker build -t $(SERVER_IMAGE) -f src/server/Dockerfile .
+	docker build -t $(SERVER_IMAGE) .
 
 dependencies: yarn.lock
 	yarn

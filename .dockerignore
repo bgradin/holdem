@@ -1,0 +1,12 @@
+.dockerignore
+Dockerfile
+src/client/
+.vscode/
+scripts/
+.eslintignore
+.eslintrc.json
+.gitignore
+.travis.yml
+LICENSE
+Makefile
+README.md
